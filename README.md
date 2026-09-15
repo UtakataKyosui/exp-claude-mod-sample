@@ -1,6 +1,6 @@
 # tool-timer — Claude Mods sample
 
-Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。
+Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。さらに `/tool-stats` スラッシュコマンドで、ツールごとの累計呼び出し回数と累計所要時間を確認できます。
 
 ## Claude Mods とは
 
@@ -23,9 +23,13 @@ Mod は、振る舞いを TypeScript の hooks module に実装した Claude Cod
 .
 ├── .claude-plugin/plugin.json  # Plugin manifest
 ├── hooks/
-│   ├── hooks.json              # hooks module の宣言
-│   └── register.ts             # Mod 本体
-├── tests/register.test.ts      # Claude Code 組み込み test runner 用
+│   ├── hooks.json              # hooks module の宣言（modules は 1 エントリのみ）
+│   ├── register.ts             # Mod 本体: hooks.json が指す唯一のエントリ
+│   ├── stats.ts                # /tool-stats 用の集計・整形ロジック
+│   └── format-duration.ts      # 所要時間の表示整形（共通）
+├── tests/
+│   ├── register.test.ts        # Claude Code 組み込み test runner 用
+│   └── stats.test.ts
 └── tsconfig.json
 ```
 
@@ -39,7 +43,14 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir .
 
 起動後に Claude にファイルを読ませるなど、何かツールを使わせてください。ツール実行中に `Timing Read…`、完了後に `Read finished in 42 ms` のように表示されます。
 
-型定義は Claude Code のバージョンに合わせて生成します。
+`/tool-stats` を実行すると、ツールごとの累計呼び出し回数と累計所要時間が一覧表示されます。集計は `$.store` に保存され、セッションをまたいで積み上がります。
+
+```text
+Read: 12 calls, 3.4 s total
+Bash: 5 calls, 820 ms total
+```
+
+型定義は `.claude/types/` に置き、Claude Code のバージョンに合わせて生成します。`.gitignore` で除外しているため、clone 後にまず実行してください。
 
 ```text
 /plugin-types

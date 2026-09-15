@@ -1,7 +1,7 @@
 {
   "name": "tool-timer",
   "version": "0.1.0",
-  "description": "A small Claude Mod that shows how long each tool call takes.",
+  "description": "A small Claude Mod that shows how long each tool call takes and tallies per-tool call counts and total time via /tool-stats.",
   "author": {
     "name": "Claude Mods sample"
   }
