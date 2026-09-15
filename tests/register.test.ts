@@ -19,6 +19,9 @@ describe('tool-timer', () => {
     })
     on('store.get', () => ({ value: undefined }))
     on('store.set', () => ({ value: undefined }))
+    on('fs.exists', () => ({ value: false }))
+    on('fs.read', () => ({ value: '' }))
+    on('fs.write', () => ({ value: undefined }))
     on('tool.call', () => ({ result: { ok: true } }))
 
     const result = await $.tool.call({ tool: 'mcp__demo__ping' })

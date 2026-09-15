@@ -2,6 +2,7 @@ import type { Register } from 'claude-code'
 
 import { formatDuration } from './format-duration'
 import { COMMAND_NAME, formatStats, isToolStats, STORE_KEY } from './stats'
+import { formatLogLine, summarizeToolCall, workLogPathOf } from './work-log'
 
 export const register: Register = on => {
   on('session.start', async ($, event, next) => {
@@ -44,6 +45,15 @@ export const register: Register = on => {
           totalMs: current.totalMs + durationMs,
         },
       })
+
+      const logPath = workLogPathOf(finishedAt)
+      const logExisted = await $.fs.exists(logPath)
+      const logSoFar = logExisted ? await $.fs.read(logPath) : ''
+
+      await $.fs.write(
+        logPath,
+        logSoFar + formatLogLine(finishedAt, event.tool, summarizeToolCall(event)),
+      )
     }
   })
 }

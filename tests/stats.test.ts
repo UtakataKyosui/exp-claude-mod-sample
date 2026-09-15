@@ -22,6 +22,9 @@ describe('tool-stats', () => {
     on('session.start', ($, event) => ({ cwd: event.cwd }))
     on('ui.notice', () => ({ value: undefined }))
     on('ui.toast', () => ({ value: undefined }))
+    on('fs.exists', () => ({ value: false }))
+    on('fs.read', () => ({ value: '' }))
+    on('fs.write', () => ({ value: undefined }))
     on('tool.call', () => ({ result: { ok: true } }))
 
     await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work' })

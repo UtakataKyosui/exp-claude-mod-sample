@@ -1,4 +1,4 @@
 {
-  "description": "Wraps tool calls and reports their elapsed time in the Claude Code UI, and tracks per-tool call counts and total time via /tool-stats.",
+  "description": "Wraps tool calls and reports their elapsed time in the Claude Code UI, tracks per-tool call counts and total time via /tool-stats, and appends each call to a daily work log file.",
   "modules": ["./register.ts"]
 }

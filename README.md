@@ -1,6 +1,6 @@
 # tool-timer — Claude Mods sample
 
-Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。さらに `/tool-stats` スラッシュコマンドで、ツールごとの累計呼び出し回数と累計所要時間を確認できます。
+Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。さらに `/tool-stats` スラッシュコマンドで、ツールごとの累計呼び出し回数と累計所要時間を確認できます。また、すべてのツール呼び出しを日付ごとの作業ログファイルに自動で記録します。
 
 ## Claude Mods とは
 
@@ -26,10 +26,12 @@ Mod は、振る舞いを TypeScript の hooks module に実装した Claude Cod
 │   ├── hooks.json              # hooks module の宣言（modules は 1 エントリのみ）
 │   ├── register.ts             # Mod 本体: hooks.json が指す唯一のエントリ
 │   ├── stats.ts                # /tool-stats 用の集計・整形ロジック
-│   └── format-duration.ts      # 所要時間の表示整形（共通）
+│   ├── format-duration.ts      # 所要時間の表示整形（共通）
+│   └── work-log.ts             # 作業ログ1行分のフォーマット・パス決定
 ├── tests/
 │   ├── register.test.ts        # Claude Code 組み込み test runner 用
-│   └── stats.test.ts
+│   ├── stats.test.ts
+│   └── work-log.test.ts
 └── tsconfig.json
 ```
 
@@ -48,6 +50,15 @@ CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 claude --plugin-dir .
 ```text
 Read: 12 calls, 3.4 s total
 Bash: 5 calls, 820 ms total
+```
+
+作業ログは `.claude/work-log/YYYY-MM-DD.md` に、ツール呼び出しごとに1行ずつ追記されます。主要な引数（`file_path`・`command`・`path` など、見つかった最初のもの）も添えます。`fs.write` はディレクトリを自動作成するので事前準備は不要です。
+
+書き込み先はこの Plugin を起動したセッションの作業ディレクトリ配下です。このリポジトリの `.gitignore` はこのリポジトリしか守りません。別のリポジトリで `claude --plugin-dir` からこの Mod を試す場合は、そのリポジトリの `.gitignore` にも `.claude/work-log/` を追加してください。また `Bash` の `command` はそのまま平文で記録されるため、トークンや認証情報を含むコマンドを扱う環境では使わないでください。
+
+```text
+- 09:15:03 Read `README.md`
+- 09:16:40 Bash `jj git push --bookmark feat/tool-stats`
 ```
 
 型定義は `.claude/types/` に置き、Claude Code のバージョンに合わせて生成します。`.gitignore` で除外しているため、clone 後にまず実行してください。
