@@ -1,7 +1,7 @@
 {
   "name": "tool-timer",
   "version": "0.1.0",
-  "description": "A small Claude Mod that shows how long each tool call takes, tallies per-tool call counts and total time via /tool-stats, and keeps a daily work log of every call.",
+  "description": "A small Claude Mod that shows how long each tool call takes, tallies per-tool call counts and total time via /tool-stats, keeps a daily work log of every call, and tracks skill (/skill-stats) and agent (/agent-stats) usage.",
   "author": {
     "name": "Claude Mods sample"
   }

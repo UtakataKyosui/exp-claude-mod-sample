@@ -1,23 +1,62 @@
 import type { Register } from 'claude-code'
 
+import { COMMAND_NAME as AGENT_STATS_COMMAND_NAME, formatAgentStats } from './agent-stats'
 import { formatDuration } from './format-duration'
-import { COMMAND_NAME, formatStats, isToolStats, STORE_KEY } from './stats'
+import {
+  COMMAND_NAME as SKILL_STATS_COMMAND_NAME,
+  formatSkillStats,
+  isSkillStats,
+  STORE_KEY as SKILL_STORE_KEY,
+} from './skill-stats'
+import { COMMAND_NAME as TOOL_STATS_COMMAND_NAME, formatStats, isToolStats, STORE_KEY } from './stats'
 import { formatLogLine, summarizeToolCall, workLogPathOf } from './work-log'
 
 export const register: Register = on => {
   on('session.start', async ($, event, next) => {
     await $.command.register({
-      name: COMMAND_NAME,
+      name: TOOL_STATS_COMMAND_NAME,
       description: 'Shows per-tool call counts and total time so far.',
+    })
+    await $.command.register({
+      name: SKILL_STATS_COMMAND_NAME,
+      description: 'Shows per-skill call counts so far.',
+    })
+    await $.command.register({
+      name: AGENT_STATS_COMMAND_NAME,
+      description: 'Shows spawned agents by type and status this session.',
     })
 
     return next(event)
   })
 
-  on('command.run', { command: COMMAND_NAME }, async $ => {
+  on('command.run', { command: TOOL_STATS_COMMAND_NAME }, async $ => {
     const stored = await $.store.get(STORE_KEY)
 
     return { text: formatStats(isToolStats(stored) ? stored : {}) }
+  })
+
+  on('command.run', { command: SKILL_STATS_COMMAND_NAME }, async $ => {
+    const stored = await $.store.get(SKILL_STORE_KEY)
+
+    return { text: formatSkillStats(isSkillStats(stored) ? stored : {}) }
+  })
+
+  on('command.run', { command: AGENT_STATS_COMMAND_NAME }, async $ => {
+    const agents = await $.agent.list()
+
+    return { text: formatAgentStats(agents) }
+  })
+
+  on('skill.prompt', async ($, event, next) => {
+    const stored = await $.store.get(SKILL_STORE_KEY)
+    const stats = isSkillStats(stored) ? stored : {}
+
+    await $.store.set(SKILL_STORE_KEY, {
+      ...stats,
+      [event.skill]: (stats[event.skill] ?? 0) + 1,
+    })
+
+    return next(event)
   })
 
   on('tool.call', async ($, event, next) => {

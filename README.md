@@ -1,6 +1,6 @@
 # tool-timer — Claude Mods sample
 
-Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。さらに `/tool-stats` スラッシュコマンドで、ツールごとの累計呼び出し回数と累計所要時間を確認できます。また、すべてのツール呼び出しを日付ごとの作業ログファイルに自動で記録します。
+Claude Code の早期アクセス機能 **Claude Mods**（旧称 Function Hooks）を試す、最小構成の Plugin です。すべてのツール呼び出しを関数フックで包み、実行中の notice と完了時の所要時間 toast を表示します。さらに `/tool-stats`・`/skill-stats`・`/agent-stats` の3つのスラッシュコマンドで、ツール・Skill・Agent それぞれの使用状況を確認できます。また、すべてのツール呼び出しを日付ごとの作業ログファイルに自動で記録します。
 
 ## Claude Mods とは
 
@@ -27,11 +27,15 @@ Mod は、振る舞いを TypeScript の hooks module に実装した Claude Cod
 │   ├── register.ts             # Mod 本体: hooks.json が指す唯一のエントリ
 │   ├── stats.ts                # /tool-stats 用の集計・整形ロジック
 │   ├── format-duration.ts      # 所要時間の表示整形（共通）
-│   └── work-log.ts             # 作業ログ1行分のフォーマット・パス決定
+│   ├── work-log.ts             # 作業ログ1行分のフォーマット・パス決定
+│   ├── skill-stats.ts          # /skill-stats 用の集計・整形ロジック
+│   └── agent-stats.ts          # /agent-stats 用の集計・整形ロジック
 ├── tests/
 │   ├── register.test.ts        # Claude Code 組み込み test runner 用
 │   ├── stats.test.ts
-│   └── work-log.test.ts
+│   ├── work-log.test.ts
+│   ├── skill-stats.test.ts
+│   └── agent-stats.test.ts
 └── tsconfig.json
 ```
 
@@ -59,6 +63,20 @@ Bash: 5 calls, 820 ms total
 ```text
 - 09:15:03 Read `README.md`
 - 09:16:40 Bash `jj git push --bookmark feat/tool-stats`
+```
+
+`/skill-stats` は Skill ごとの累計呼び出し回数を表示します。`skill.prompt` イベント（Skill が展開されてモデルに渡る直前のフック）を数えており、`$.store` に保存されるので `/tool-stats` と同じくセッションをまたいで積み上がります。
+
+```text
+commit: 4 calls
+code-review: 2 calls
+```
+
+`/agent-stats` は `$.agent.list()` が返す、そのセッションで spawn された Agent（サブエージェント・teammate）を種別（`subagent_type`）ごとに集計し、状態（`running`・`completed` など）の内訳とあわせて表示します。`$.agent.list()` はセッション内の情報しか返さないため、こちらは `/tool-stats`・`/skill-stats` と違って**セッションをまたいで累積しません**。
+
+```text
+general-purpose: 3 (completed: 2, running: 1)
+Explore: 1 (completed: 1)
 ```
 
 型定義は `.claude/types/` に置き、Claude Code のバージョンに合わせて生成します。`.gitignore` で除外しているため、clone 後にまず実行してください。
