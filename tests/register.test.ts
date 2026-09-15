@@ -17,6 +17,8 @@ describe('tool-timer', () => {
       toasts.push(event.text)
       return { value: undefined }
     })
+    on('store.get', () => ({ value: undefined }))
+    on('store.set', () => ({ value: undefined }))
     on('tool.call', () => ({ result: { ok: true } }))
 
     const result = await $.tool.call({ tool: 'mcp__demo__ping' })
