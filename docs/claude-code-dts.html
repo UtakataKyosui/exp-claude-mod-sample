@@ -1,0 +1,839 @@
+<!doctype html>
+<title>claude-code.d.ts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --bg: #f5f6fb;
+    --surface: #ffffff;
+    --surface-2: #ececf6;
+    --text: #1a1d29;
+    --text-dim: #5b6072;
+    --text-faint: #868ba0;
+    --border: #dcdfec;
+    --accent: #3d54d6;
+    --accent-ink: #ffffff;
+    --accent-soft: #e7ebfc;
+    --accent-soft-border: #c7d0f5;
+    --tag-bg: #eef0fa;
+    --tag-border: #d7dbee;
+    --code-bg: #14161f;
+    --code-text: #d9dceb;
+    --code-accent: #8fb2ff;
+    --shadow: 0 1px 2px rgba(20, 22, 40, 0.04), 0 8px 24px -12px rgba(20, 22, 40, 0.12);
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1017;
+      --surface: #161822;
+      --surface-2: #1d202c;
+      --text: #e8e9f3;
+      --text-dim: #9a9eb5;
+      --text-faint: #6d7189;
+      --border: #2a2d3c;
+      --accent: #8fa4ff;
+      --accent-ink: #10131f;
+      --accent-soft: #202641;
+      --accent-soft-border: #333d63;
+      --tag-bg: #1c1f2c;
+      --tag-border: #2d3145;
+      --code-bg: #0a0b11;
+      --code-text: #cdd0e2;
+      --code-accent: #9fbaff;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0f1017;
+    --surface: #161822;
+    --surface-2: #1d202c;
+    --text: #e8e9f3;
+    --text-dim: #9a9eb5;
+    --text-faint: #6d7189;
+    --border: #2a2d3c;
+    --accent: #8fa4ff;
+    --accent-ink: #10131f;
+    --accent-soft: #202641;
+    --accent-soft-border: #333d63;
+    --tag-bg: #1c1f2c;
+    --tag-border: #2d3145;
+    --code-bg: #0a0b11;
+    --code-text: #cdd0e2;
+    --code-accent: #9fbaff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans JP", "IBM Plex Sans", "Hiragino Sans", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding-inline: max(18px, env(safe-area-inset-left, 0px));
+    padding-block: max(28px, env(safe-area-inset-top, 0px)) max(40px, env(safe-area-inset-bottom, 0px));
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  code, .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+  /* ---- Header ---- */
+  header.top {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 16px;
+    max-width: 62ch;
+    margin: 0;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .badge {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--tag-border);
+    background: var(--tag-bg);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .badge b { color: var(--text); font-weight: 600; }
+
+  /* ---- TOC ---- */
+  nav.toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 36px;
+  }
+  nav.toc a {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    transition: border-color .15s, color .15s;
+  }
+  nav.toc a:hover { border-color: var(--border); color: var(--text); }
+  nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---- Section scaffolding ---- */
+  section { margin-bottom: 44px; scroll-margin-top: 20px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .section-num {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+  .section-lede {
+    color: var(--text-dim);
+    max-width: 68ch;
+    margin: 8px 0 20px;
+  }
+
+  /* ---- Overview cards ---- */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 700px) { .overview-grid { grid-template-columns: 1fr; } }
+  .ov-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .ov-card .mono.tag-mini {
+    display: inline-block;
+    font-size: 11.5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft-border);
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+  }
+  .ov-card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .ov-card p { margin: 0; color: var(--text-dim); font-size: 13.5px; line-height: 1.6; }
+
+  .callout {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-top: 16px;
+  }
+  .callout .glyph {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding-top: 2px;
+  }
+  .callout p { margin: 0 0 8px; color: var(--text-dim); font-size: 14px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout code.inline { color: var(--text); }
+
+  /* ---- Category cards ---- */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 700px) { .cat-grid { grid-template-columns: 1fr; } }
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cat-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .cat-card h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: "IBM Plex Sans JP", "IBM Plex Sans", sans-serif;
+  }
+  .count-pill {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 9px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cat-card p.desc {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .type-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 2px;
+  }
+  .type-tags .t {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--text-dim);
+    padding: 3px 7px;
+    border-radius: 5px;
+  }
+  .type-tags .t.more { color: var(--text-faint); background: transparent; border-style: dashed; }
+
+  .cat-card.highlight { border-color: var(--accent-soft-border); background: var(--accent-soft); }
+  .cat-card.highlight .type-tags .t { background: var(--surface); }
+
+  /* ---- Tool cloud ---- */
+  .tool-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .tool-cloud .tool {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    padding: 6px 11px;
+    border-radius: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .tool-cloud .tool.used {
+    border-color: var(--accent-soft-border);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .swatch.used { background: var(--accent-soft); border: 1px solid var(--accent-soft-border); }
+  .swatch.plain { background: var(--surface); border: 1px solid var(--border); }
+
+  /* ---- Code blocks ---- */
+  pre.code-block {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin: 0;
+  }
+  pre.code-block .c { color: var(--code-accent); }
+  pre.code-block .s { color: #b7d99b; }
+  .code-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 700px) { .code-pair { grid-template-columns: 1fr; } }
+  .code-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ---- Module map table ---- */
+  .module-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .module-table-wrap { overflow-x: auto; }
+  .module-table th, .module-table td {
+    text-align: left;
+    padding: 11px 14px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .module-table th {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    background: var(--surface-2);
+  }
+  .module-table tr:last-child td { border-bottom: none; }
+  .module-table td.rng { font-family: "IBM Plex Mono", monospace; color: var(--text-dim); white-space: nowrap; }
+  .module-table td.name { font-family: "IBM Plex Mono", monospace; color: var(--accent); font-weight: 500; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--text-dim); }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <span class="eyebrow">Type Reference &mdash; Claude Code Plugin API</span>
+    <h1>claude-code.d.ts</h1>
+    <p class="subtitle">Claude Code のプラグイン(function hooks)が `$` を通じて触れるものすべて &mdash; イベント、Engine、ビルトインツール、UI 描画、テストキット &mdash; を1本の宣言ファイルに束ねたもの。</p>
+    <div class="meta-row">
+      <span class="badge">written by <b>Claude Code 2.1.271</b></span>
+      <span class="badge"><b>10,736</b> lines</span>
+      <span class="badge">auto-generated via <b>/plugin-types</b></span>
+      <span class="badge">TypeScript <b>5.4+</b></span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <a href="#overview">概要</a>
+    <a href="#hooks">フック基盤</a>
+    <a href="#engine">Engine (`$`)</a>
+    <a href="#tools">ツール呼び出し</a>
+    <a href="#ui">UI描画</a>
+    <a href="#command-config">コマンド/設定</a>
+    <a href="#session">セッション/コンテキスト</a>
+    <a href="#prompt-turn">プロンプト/ターン</a>
+    <a href="#utility">基盤ユーティリティ</a>
+    <a href="#testing">テストキット</a>
+    <a href="#extend">拡張パターン</a>
+  </nav>
+
+  <section id="overview">
+    <div class="section-head"><span class="section-num">00</span><h2>ファイルの構成</h2></div>
+    <p class="section-lede">このファイルは4つの <code class="mono">declare module</code> ブロックからなる。実体は3つのモジュール定義で、うち1つ(<code class="mono">claude-code</code> 本体)がビルトインツールのスキーマ拡張により2ブロックに分かれている。</p>
+
+    <div class="module-table-wrap">
+      <table class="module-table">
+        <thead><tr><th>行範囲</th><th>モジュール</th><th>役割</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="rng">L64&ndash;9411</td>
+            <td class="name">'claude-code'</td>
+            <td>フックモジュールが <code class="mono">import type</code> する本体。イベント/Engine/UI/セッションなど約230の型がフラットに export される。</td>
+          </tr>
+          <tr>
+            <td class="rng">L9412&ndash;9927</td>
+            <td class="name">'claude-code/testing'</td>
+            <td><code class="mono">claude plugin test</code> が使う <code class="mono">test</code> / <code class="mono">expect</code> / <code class="mono">mock</code> などのテストキット。</td>
+          </tr>
+          <tr>
+            <td class="rng">L9928&ndash;10151</td>
+            <td class="name">'claude-code' (再オープン)</td>
+            <td><code class="mono">BuiltinToolInputs</code> へ、このビルドが持つ全ビルトインツールの入力スキーマを declaration merging で追加。</td>
+          </tr>
+          <tr>
+            <td class="rng">L10152&ndash;10736</td>
+            <td class="name">'claude-code' (再オープン)</td>
+            <td>同様に <code class="mono">BuiltinToolResults</code> へ各ツールの戻り値の型を追加。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="glyph">RUNTIME</span>
+      <div>
+        <p>フックモジュールは DOM も Node もない専用サンドボックスで実行される。<code class="inline mono">import</code> は実行時には空になる純粋な型のためのモジュールで、JSX は <code class="inline mono">h</code> / <code class="inline mono">Fragment</code> にコンパイルされる(React ではない)。<code class="inline mono">Box</code> / <code class="inline mono">Text</code> のような UI 要素はグローバルに生えているのではなく、描画対象サーフェスのテーブルから都度取り出す &mdash; <code class="inline mono">const { Box, Text } = $.ui.resolve(e)</code>。</p>
+        <p>ファイル自体は手編集の対象外。プラグインが増えるたびに <code class="inline mono">/plugin-types</code> で再生成され、有効なプラグインごとの契約は隣接する <code class="inline mono">claude-code-plugins/&lt;plugin&gt;.d.ts</code> に個別出力される。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="hooks">
+    <div class="section-head"><span class="section-num">01</span><h2>フック基盤</h2></div>
+    <p class="section-lede">プラグインの核 &mdash; イベント名の文字列からフック関数のシグネチャを型レベルで導出する仕組み。<code class="mono">"tool.*"</code> のような glob パターンや <code class="mono">"!engine.create"</code> のような否定パターンも、条件型とテンプレートリテラル型でイベント名の集合として解決される。</p>
+    <div class="cat-grid">
+      <div class="cat-card highlight">
+        <div class="cat-card-head"><h3>イベント名とパターン照合</h3><span class="count-pill">~15 types</span></div>
+        <p class="desc">文字列パターンをイベント名の集合へ、集合を対応するフック関数の型へ変換する型レベル演算。</p>
+        <div class="type-tags">
+          <span class="t">EventName</span><span class="t">Pattern</span><span class="t">Glob</span>
+          <span class="t">Selected&lt;P&gt;</span><span class="t">Matcher</span><span class="t">MatchedEvent</span>
+          <span class="t">MatchedHook</span><span class="t">Namespace</span><span class="t">Narrowed</span>
+          <span class="t more">+6 more</span>
+        </div>
+      </div>
+      <div class="cat-card highlight">
+        <div class="cat-card-head"><h3>登録 &amp; 実行フロー</h3><span class="count-pill">~14 types</span></div>
+        <p class="desc"><code class="mono">register(on, options)</code> の <code class="mono">on</code> ・各フックの <code class="mono">next()</code>・エラー捕捉・実行トレースの型。</p>
+        <div class="type-tags">
+          <span class="t">Register</span><span class="t">On</span><span class="t">Hook</span><span class="t">HookFor&lt;P&gt;</span>
+          <span class="t">Next</span><span class="t">StarNext</span><span class="t">CatchHandler</span><span class="t">Caught</span>
+          <span class="t">TraceEntry</span><span class="t">TraceOutcome</span>
+          <span class="t more">+4 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>ストリーミングフック</h3><span class="count-pill">~5 types</span></div>
+        <p class="desc"><code class="mono">turn.step</code> のようなチャンクを逐次 yield するフックの <code class="mono">AsyncGenerator</code> ベースの型。</p>
+        <div class="type-tags">
+          <span class="t">StreamHook</span><span class="t">StreamHookBody</span><span class="t">StreamNext</span>
+          <span class="t">StreamingEventName</span><span class="t">Chunk&lt;N&gt;</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>旧形式フックとの互換</h3><span class="count-pill">~6 types</span></div>
+        <p class="desc">JSON ベースの旧 hooks (<code class="mono">hook_event_name</code> 方式) を新イベント体系にマップする互換層。</p>
+        <div class="type-tags">
+          <span class="t">ClassicHookEvent</span><span class="t">ClassicEventName</span><span class="t">ClassicHookInputs</span>
+          <span class="t">ClassicResult</span><span class="t">ClassicResultOf</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="engine">
+    <div class="section-head"><span class="section-num">02</span><h2>Engine インターフェース &mdash; <code class="mono">$</code></h2></div>
+    <p class="section-lede">フック関数の第一引数 <code class="mono">$: EngineInterface</code> がプラグインの操作対象そのもの。<code class="mono">CoreEngineInterface</code> は L1806&ndash;2691 の885行を占め、ファイル中最大の単一定義。ここに agent / config / context / fs / http / mcp / model / permission / prompt / session / skill / tool / turn / ui など、機能ごとの「名詞」がぶら下がる。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>Engine 本体</h3><span class="count-pill">8 types</span></div>
+        <p class="desc">プラグインごとの拡張がマージされる前の素の Engine 契約と、engine.create の入出力。</p>
+        <div class="type-tags">
+          <span class="t">CoreEngineInterface</span><span class="t">EngineInterface</span><span class="t">EngineInterfaceBuilt</span>
+          <span class="t">EngineCreateInput</span><span class="t">EngineCreateResult</span><span class="t">NoEngineInterface</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>パーミッション / 操作承認</h3><span class="count-pill">~11 types</span></div>
+        <p class="desc">ツール実行前に許可/拒否/確認を返す PreToolUse フローと、汎用の操作(Op)イベント群。</p>
+        <div class="type-tags">
+          <span class="t">PreToolUseDecision</span><span class="t">PreToolUseResult</span><span class="t">PermissionRequestDecision</span>
+          <span class="t">OpEventName</span><span class="t">OpEventOf</span><span class="t">OpValueOf</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="section-head"><span class="section-num">03</span><h2>ツール呼び出し</h2></div>
+    <p class="section-lede"><code class="mono">$.tool.call(...)</code> の入出力を型付けする層。<code class="mono">BuiltinToolInputs</code> / <code class="mono">BuiltinToolResults</code> は declaration merging で後から埋められ、<code class="mono">e.tool === "Bash"</code> のような判定でその場で narrowing が効くようになっている。MCP ツールは <code class="mono">mcp__&lt;server&gt;__&lt;tool&gt;</code> という命名規約の template literal 型で表現される。</p>
+
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>呼び出しの型基盤</h3><span class="count-pill">~13 types</span></div>
+        <p class="desc">ビルトイン/MCP を横断する呼び出しエンベロープと結果の集約。</p>
+        <div class="type-tags">
+          <span class="t">ToolCallInput</span><span class="t">ToolCallEnvelope</span><span class="t">ToolCallResult</span>
+          <span class="t">ToolSpec</span><span class="t">ToolInfo</span><span class="t">ToolDescribeInput</span>
+          <span class="t more">+5 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>MCP ツール</h3><span class="count-pill">6 types</span></div>
+        <p class="desc">外部 MCP サーバーが公開するツールの入出力とコンテンツブロック。</p>
+        <div class="type-tags">
+          <span class="t">McpToolInputs</span><span class="t">McpToolName</span><span class="t">McpToolCallInput</span>
+          <span class="t">McpToolResult</span><span class="t">McpContentBlock</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-lede" style="margin-top:22px;">このビルドが持つビルトインツール(<code class="mono">BuiltinToolInputs</code> / <code class="mono">BuiltinToolResults</code> がマージする22種)。<span style="color:var(--accent)">◆ 印はこのセッション自身が実際に使ったツール</span>。</p>
+    <div class="tool-cloud">
+      <span class="tool used">Agent ◆</span>
+      <span class="tool used">Bash ◆</span>
+      <span class="tool">CronCreate</span>
+      <span class="tool">CronDelete</span>
+      <span class="tool">CronList</span>
+      <span class="tool used">Edit ◆</span>
+      <span class="tool">EnterWorktree</span>
+      <span class="tool">ExitWorktree</span>
+      <span class="tool">ListAgents</span>
+      <span class="tool">NotebookEdit</span>
+      <span class="tool">PowerShell</span>
+      <span class="tool used">Read ◆</span>
+      <span class="tool">ReportFindings</span>
+      <span class="tool used">ScheduleWakeup ◆</span>
+      <span class="tool used">SendMessage ◆</span>
+      <span class="tool used">Skill ◆</span>
+      <span class="tool">TaskOutput</span>
+      <span class="tool">TaskStop</span>
+      <span class="tool used">ToolSearch ◆</span>
+      <span class="tool used">WebFetch ◆</span>
+      <span class="tool">WebSearch</span>
+      <span class="tool">Workflow</span>
+      <span class="tool used">Write ◆</span>
+    </div>
+    <div class="legend">
+      <span><span class="swatch used"></span>このセッションで実際に呼んだツール</span>
+      <span><span class="swatch plain"></span>型定義上は存在するが未使用</span>
+    </div>
+  </section>
+
+  <section id="ui">
+    <div class="section-head"><span class="section-num">04</span><h2>UI 描画</h2></div>
+    <p class="section-lede">プラグインが JSX で組み立てる宣言的 UI の型。<code class="mono">RenderSurface</code> は <code class="mono">'terminal' | 'desktop' | 'mobile'</code> の3つで、同じコンポーネントでもサーフェスごとに props の形が変わり得る(<code class="mono">RenderPropsOf&lt;C, P&gt;</code>)。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>要素 &amp; props</h3><span class="count-pill">~16 types</span></div>
+        <p class="desc"><code class="mono">$.ui.resolve(e)</code> で取り出す Box / Text / Button / Input など各要素の props。</p>
+        <div class="type-tags">
+          <span class="t">BoxProps</span><span class="t">TextProps</span><span class="t">ButtonProps</span><span class="t">InputProps</span>
+          <span class="t">LinkProps</span><span class="t">SelectProps</span><span class="t">SvgProps</span><span class="t">RasterProps</span>
+          <span class="t">CodeProps</span>
+          <span class="t more">+7 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>描画パイプライン</h3><span class="count-pill">~14 types</span></div>
+        <p class="desc">ui.render / ui.resolve イベントの入出力と、要素ツリーの表現そのもの。</p>
+        <div class="type-tags">
+          <span class="t">RenderElement</span><span class="t">RenderComponent</span><span class="t">RenderSurface</span>
+          <span class="t">Elements</span><span class="t">RenderInputOf</span><span class="t">ResolveInputOf</span>
+          <span class="t more">+8 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>クライアントモジュール &amp; 入力</h3><span class="count-pill">~8 types</span></div>
+        <p class="desc">カスタムクライアントコンポーネントと、ポインター/キーイベントの受け取り方。</p>
+        <div class="type-tags">
+          <span class="t">ClientModule</span><span class="t">ClientProps</span><span class="t">ClientSurface</span>
+          <span class="t">ClientPointerEvent</span><span class="t">ClientKeyEvent</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>UI 操作イベント</h3><span class="count-pill">~14 types</span></div>
+        <p class="desc">フォーカス/スクロール/選択/押下/入力/メッセージなど、UI に対する能動的操作。</p>
+        <div class="type-tags">
+          <span class="t">UiFocusInput</span><span class="t">UiScrollInput</span><span class="t">UiSelectArgument</span>
+          <span class="t">UiPressArgument</span><span class="t">UiInputArgument</span><span class="t">UiBlitArgs</span>
+          <span class="t more">+8 more</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="command-config">
+    <div class="section-head"><span class="section-num">05</span><h2>コマンド / 設定</h2></div>
+    <p class="section-lede">スラッシュコマンドの登録・実行と、<code class="mono">$.config</code> 経由の設定値の読み書き。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>コマンド</h3><span class="count-pill">~9 types</span></div>
+        <p class="desc">プラグインが登録するスラッシュコマンドの記述子と実行結果。</p>
+        <div class="type-tags">
+          <span class="t">CommandSpec</span><span class="t">CommandInfo</span><span class="t">CommandSource</span>
+          <span class="t">CommandRunInput</span><span class="t">CommandRunResult</span><span class="t">CommandPresentation</span>
+          <span class="t more">+3 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>設定値</h3><span class="count-pill">~7 types</span></div>
+        <p class="desc">boolean / choice / text / number の4種類の設定値と、その出所(user/project/local/flag/policy)。</p>
+        <div class="type-tags">
+          <span class="t">ConfigRow</span><span class="t">ConfigValue</span><span class="t">ConfigKind</span>
+          <span class="t">ConfigOrigin</span><span class="t">ConfigSetInput</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="session">
+    <div class="section-head"><span class="section-num">06</span><h2>セッション / コンテキスト</h2></div>
+    <p class="section-lede">セッションの開始・圧縮(compact)・使用量・コストと、コンテキストウィンドウの内訳(スキル・MCP ツール・メモリファイル・スラッシュコマンドがそれぞれどれだけ場所を食っているか)。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>ライフサイクル</h3><span class="count-pill">~13 types</span></div>
+        <p class="desc">開始/接続/切断/圧縮(自動・手動・プラグイン起因)とその結果。</p>
+        <div class="type-tags">
+          <span class="t">SessionStartInput</span><span class="t">SessionAttachInput</span><span class="t">SessionDetachInput</span>
+          <span class="t">SessionCompactInput</span><span class="t">SessionCompactTrigger</span><span class="t">SessionCompacted</span>
+          <span class="t more">+3 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>使用量 &amp; コスト</h3><span class="count-pill">~6 types</span></div>
+        <p class="desc">トークン使用量、レート制限、API コストの集計。</p>
+        <div class="type-tags">
+          <span class="t">SessionUsage</span><span class="t">SessionCost</span><span class="t">SessionRateLimit</span>
+          <span class="t">ContextApiUsage</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>コンテキスト内訳</h3><span class="count-pill">~12 types</span></div>
+        <p class="desc">コンテキストウィンドウの使用元を要素ごとに分解 &mdash; 本ページを表示する仕組みそのものの内部と同系統の型。</p>
+        <div class="type-tags">
+          <span class="t">ContextCategory</span><span class="t">ContextSkills</span><span class="t">ContextMcpTool</span>
+          <span class="t">ContextMemoryFile</span><span class="t">ContextGridSquare</span><span class="t">SessionContextBreakdown</span>
+          <span class="t more">+4 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>メッセージ受信</h3><span class="count-pill">~4 types</span></div>
+        <p class="desc">エージェント間 <code class="mono">SendMessage</code> のような外部からの受信イベント。</p>
+        <div class="type-tags">
+          <span class="t">SessionReceiveInput</span><span class="t">SessionReceiveEvent</span><span class="t">SessionReceiveOrigin</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="prompt-turn">
+    <div class="section-head"><span class="section-num">07</span><h2>プロンプト / ターン</h2></div>
+    <p class="section-lede">ユーザー入力の送信から、モデルが1ターンを消化しきるまでのライフサイクル。<code class="mono">TurnStepChunk</code> はテキスト/思考(thinking)/ツール呼び出し/入力/停止/エンジンの6種の判別共用体で、ストリーミング中に逐次届く。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>プロンプト送信</h3><span class="count-pill">~13 types</span></div>
+        <p class="desc">入力の充填(fill)・提出(submit)・提案(suggest)と、コンテキストブロックの差し込み。</p>
+        <div class="type-tags">
+          <span class="t">PromptSubmitInput</span><span class="t">PromptFillInput</span><span class="t">PromptSuggestInput</span>
+          <span class="t">PromptContextBlock</span><span class="t">PromptAttachment</span>
+          <span class="t more">+6 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>ターンの進行</h3><span class="count-pill">~14 types</span></div>
+        <p class="desc">ターン開始・逐次ステップ・完了(回答/中断/拒否/エラーの4理由)。</p>
+        <div class="type-tags">
+          <span class="t">TurnStartInput</span><span class="t">TurnStepChunk</span><span class="t">TurnStepToolUse</span>
+          <span class="t">TurnCompleteInput</span><span class="t">TurnCompleteReason</span><span class="t">TurnRefusal</span>
+          <span class="t more">+3 more</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>モデル呼び出し</h3><span class="count-pill">~5 types</span></div>
+        <p class="desc">モデルの補完リクエストと、サブエージェント分岐(fork)の使用量。</p>
+        <div class="type-tags">
+          <span class="t">ModelCompleteRequest</span><span class="t">ModelForkRequest</span><span class="t">ModelForkUsage</span><span class="t">TurnUsage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="utility">
+    <div class="section-head"><span class="section-num">08</span><h2>基盤ユーティリティ</h2></div>
+    <p class="section-lede">ファイルシステム/HTTP/音声/タイマーなど、フック実行環境がサンドボックス越しに提供する低レベル能力。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>ファイルシステム &amp; HTTP</h3><span class="count-pill">~9 types</span></div>
+        <p class="desc">実 fs/http を持たない環境向けの抽象化された読み取り専用アクセス。</p>
+        <div class="type-tags">
+          <span class="t">FsEntry</span><span class="t">FsStat</span><span class="t">FsAncestor</span><span class="t">HttpInit</span><span class="t">HttpResponse</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>音声 &amp; 通知</h3><span class="count-pill">~7 types</span></div>
+        <p class="desc">効果音再生・読み上げ・トースト通知・確認ダイアログ。</p>
+        <div class="type-tags">
+          <span class="t">AudioClip</span><span class="t">PlayOptions</span><span class="t">SpeakOptions</span>
+          <span class="t">ToastOptions</span><span class="t">AskOptions</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>ペイン &amp; プラグイン管理</h3><span class="count-pill">~9 types</span></div>
+        <p class="desc">サブパネル(Pane)の開閉、プラグイン自身の登録情報。</p>
+        <div class="type-tags">
+          <span class="t">PaneOpenArgs</span><span class="t">PaneCloseInput</span>
+          <span class="t">PluginRegisterInput</span><span class="t">PluginRegisterResult</span><span class="t">Tier</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>タイマー &amp; 帰属テキスト</h3><span class="count-pill">~7 types</span></div>
+        <p class="desc"><code class="mono">setTimeout</code> 相当の型付きラッパーと、commit/PR の帰属(attribution)文言生成。</p>
+        <div class="type-tags">
+          <span class="t">Timer</span><span class="t">TimerCall</span><span class="t">JsonValue</span>
+          <span class="t">AttributionTextInput</span><span class="t">AttributionTextKind</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="testing">
+    <div class="section-head"><span class="section-num">09</span><h2>テストキット &mdash; <code class="mono">'claude-code/testing'</code></h2></div>
+    <p class="section-lede"><code class="mono">claude plugin test &lt;dir&gt;</code> が <code class="mono">*.test.ts</code> / <code class="mono">*.test.tsx</code> に注入する、フック実行時と同じ制約(fs・network・process なし)の環境で動くテストランナー。</p>
+    <div class="cat-grid">
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>テスト定義</h3><span class="count-pill">~6 types</span></div>
+        <p class="desc"><code class="mono">test(name, async ($, on) =&gt; { ... })</code> の形と <code class="mono">describe</code> によるグルーピング。</p>
+        <div class="type-tags">
+          <span class="t">test</span><span class="t">describe</span><span class="t">TestBody</span><span class="t">TestOptions</span><span class="t">tier</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>アサーション</h3><span class="count-pill">~11 types</span></div>
+        <p class="desc">Jest 系に近い <code class="mono">expect</code> / matcher 一式。非同期・否定(<code class="mono">.not</code>)・例外系をカバー。</p>
+        <div class="type-tags">
+          <span class="t">expect</span><span class="t">Expectation</span><span class="t">Matchers</span><span class="t">AsyncMatchers</span>
+          <span class="t">Negatable&lt;M&gt;</span><span class="t">ThrowExpectation</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>モック</h3><span class="count-pill">~5 types</span></div>
+        <p class="desc">時計・ストア・環境をメモリ上で差し替える <code class="mono">mock</code>。</p>
+        <div class="type-tags">
+          <span class="t">mock</span><span class="t">Mock</span><span class="t">MockClock</span><span class="t">MockClockOptions</span>
+        </div>
+      </div>
+      <div class="cat-card">
+        <div class="cat-card-head"><h3>テスト内 Engine</h3><span class="count-pill">~6 types</span></div>
+        <p class="desc">テスト対象プラグインの下に敷かれる、フックを合成した軽量 Engine。</p>
+        <div class="type-tags">
+          <span class="t">Engine</span><span class="t">EngineCall</span><span class="t">EngineNoun</span><span class="t">EnginePress</span><span class="t">PressTarget</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="extend">
+    <div class="section-head"><span class="section-num">10</span><h2>プラグインによる拡張パターン</h2></div>
+    <p class="section-lede">プラグインは自分の <code class="mono">.d.ts</code>(<code class="mono">plugin.json</code> の <code class="mono">"types"</code> で指定)を通じて <code class="mono">EngineInterface</code> に新しい「名詞」を declaration merging で追加できる。依存する側のプラグインは import も reference も書かずに、この include 済みフォルダ経由で型が見える。</p>
+    <div class="code-pair">
+      <div>
+        <div class="code-label">プラグイン本体の型付け</div>
+        <pre class="code-block"><span class="c">// hooks/index.ts</span>
+<span class="c">import type</span> { Register } <span class="c">from</span> <span class="s">'claude-code'</span>
+
+<span class="c">export const</span> register: Register = (on, options) => {
+  on(<span class="s">'tool.call'</span>, ($, e, next) => {
+    <span class="c">// e.tool === "Bash" でここが narrowing される</span>
+    <span class="c">return</span> next()
+  })
+}</pre>
+      </div>
+      <div>
+        <div class="code-label">新しい noun を $ へ追加する</div>
+        <pre class="code-block"><span class="c">// types/topo.d.ts</span>
+<span class="c">export type</span> Topo = { <span class="c">/* ... */</span> }
+
+<span class="c">declare module</span> <span class="s">'claude-code'</span> {
+  <span class="c">interface</span> EngineInterface {
+    topo: Topo
+  }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Source: <a href="https://github.com/anthropics/claude-code/blob/main/mods/types/claude-code.d.ts">anthropics/claude-code &middot; mods/types/claude-code.d.ts</a></span>
+    <span>Local copy verified byte-identical at <code class="mono">.claude/types/claude-code.d.ts</code></span>
+  </footer>
+
+</div>
