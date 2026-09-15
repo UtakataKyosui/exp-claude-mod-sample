@@ -1,0 +1,4 @@
+{
+  "description": "Wraps tool calls and reports their elapsed time in the Claude Code UI.",
+  "modules": ["./register.ts"]
+}
